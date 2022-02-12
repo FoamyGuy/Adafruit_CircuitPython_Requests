@@ -456,6 +456,10 @@ class Response:
             # <5.3.1 doesn't piecemeal load json from any object with readinto so load the whole
             # string.
             obj = json.loads(self._raw.read())
+        except UnicodeDecodeError as gzip_error:
+            if self._raw.read()[0:2] == b"\x1f\x8b":
+                raise ValueError("Unable to read GZipped data.") from gzip_error
+
         if not self._cached:
             self._cached = obj
         self.close()
